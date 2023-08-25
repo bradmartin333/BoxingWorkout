@@ -45,6 +45,7 @@
         var timerDiv = document.querySelector(".timer");
         var roundTimer = document.querySelector(".time-string");
         var startButton = document.querySelector(".start-button");
+        var timer_beep = new Audio("assets/timer_sounds/timer_beep.wav");
         function secondsToTimeString(seconds) {
             var minutes = Math.floor(seconds / 60);
             var seconds = seconds % 60;
@@ -61,6 +62,7 @@
         function decrementTime(seconds) {
             timeLeft -= 1;
             if (timeLeft < 0) {
+                timer_beep.play();
                 inRound = !inRound;
                 timeLeft = inRound ? roundTime : pauseTime;
                 timerDiv.style.backgroundColor = inRound ? "#90EE90" : "#FF7F7F";
@@ -68,6 +70,7 @@
             roundTimer.innerHTML = secondsToTimeString(timeLeft);
         }
         startButton.addEventListener("click", function () {
+            timer_beep.play();
             timerDiv.style.backgroundColor = "#FF7F7F";
             startButton.style.display = "none";
             decrementTime();

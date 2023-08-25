@@ -36,14 +36,17 @@
 
 <body style="font-family: sans-serif;" onload="loadTime()">
     <section class="timer">
-        <div class="time-string">1:00</div>
+        <div id="round" style="margin: 10px; font-size: 15vh;">Round 0</div>
+        <div class="time-string"></div>
         <button class="start-button">Start</button>
     </section>
     <script>
+        var roundNum = 0;
         var pauseTime = 60;
         var roundTime = 180;
         var timeLeft = 10;
         var inRound = false;
+        var roundStr = document.querySelector("#round");
         var timerDiv = document.querySelector(".timer");
         var roundTimer = document.querySelector(".time-string");
         var startButton = document.querySelector(".start-button");
@@ -74,6 +77,10 @@
             if (timeLeft < 0) {
                 timer_beep.play();
                 inRound = !inRound;
+                if (inRound) {
+                    roundNum++;
+                    roundStr.innerHTML = "Round " + roundNum;
+                }
                 timeLeft = inRound ? roundTime : pauseTime;
                 timerDiv.style.backgroundColor = inRound ? "#90EE90" : "#FF7F7F";
             } else if (inRound) {
@@ -92,6 +99,12 @@
             decrementTime();
             var timerId = setInterval(function () {
                 decrementTime();
+                if (inRound === false && roundNum === 2) {
+                    clearInterval(timerId);
+                    roundStr.innerHTML = "DONE";
+                    roundTimer.style.display = "none";
+                    return;
+                }
             }, 1000);
         });
     </script>

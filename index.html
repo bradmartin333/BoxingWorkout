@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Boxing Timer</title>
+    <style>
+        .timer {
+            border: 1px solid black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            row-gap: 10px;
+        }
+
+        .timer .time-string {
+            font-size: 20vh;
+            margin: 10px;
+        }
+
+        .timer .start-button {
+            width: 30vw;
+            height: 7vh;
+            font-size: 5vh;
+            background-color: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+
+<body style="font-family: sans-serif;" onload="loadTime()">
+    <section class="timer">
+        <div class="time-string">1:00</div>
+        <button class="start-button">Start</button>
+    </section>
+    <script>
+        var pauseTime = 60;
+        var roundTime = 180;
+        var timeLeft = pauseTime;
+        var inRound = false;
+        var timerDiv = document.querySelector(".timer");
+        var roundTimer = document.querySelector(".time-string");
+        var startButton = document.querySelector(".start-button");
+        function secondsToTimeString(seconds) {
+            var minutes = Math.floor(seconds / 60);
+            var seconds = seconds % 60;
+            var timeString = minutes + ":";
+            if (seconds < 10) {
+                timeString += "0";
+            }
+            timeString += seconds;
+            return timeString;
+        }
+        function loadTime() {
+            roundTimer.innerHTML = secondsToTimeString(timeLeft);
+        }
+        function decrementTime(seconds) {
+            timeLeft -= 1;
+            if (timeLeft < 0) {
+                inRound = !inRound;
+                timeLeft = inRound ? roundTime : pauseTime;
+                timerDiv.style.backgroundColor = inRound ? "#90EE90" : "#FF7F7F";
+            }
+            roundTimer.innerHTML = secondsToTimeString(timeLeft);
+        }
+        startButton.addEventListener("click", function () {
+            timerDiv.style.backgroundColor = "#FF7F7F";
+            startButton.style.display = "none";
+            decrementTime();
+            var timerId = setInterval(function () {
+                decrementTime();
+            }, 1000);
+        });
+    </script>
+</body>
+
+</html>

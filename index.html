@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boxing Timer</title>
     <style>
         .timer {
@@ -40,12 +42,20 @@
     <script>
         var pauseTime = 60;
         var roundTime = 180;
-        var timeLeft = pauseTime;
+        var timeLeft = 10;
         var inRound = false;
         var timerDiv = document.querySelector(".timer");
         var roundTimer = document.querySelector(".time-string");
         var startButton = document.querySelector(".start-button");
-        var timer_beep = new Audio("assets/timer_sounds/timer_beep.wav");
+        var timer_beep = new Audio("assets/sounds/timer.wav");
+        var coach_sounds = [
+            new Audio("assets/sounds/coach/one.mp3"),
+            new Audio("assets/sounds/coach/two.mp3"),
+            new Audio("assets/sounds/coach/left.mp3"),
+            new Audio("assets/sounds/coach/right.mp3"),
+            new Audio("assets/sounds/coach/pivot in.mp3"),
+            new Audio("assets/sounds/coach/pivot out.mp3"),
+        ];
         function secondsToTimeString(seconds) {
             var minutes = Math.floor(seconds / 60);
             var seconds = seconds % 60;
@@ -66,6 +76,12 @@
                 inRound = !inRound;
                 timeLeft = inRound ? roundTime : pauseTime;
                 timerDiv.style.backgroundColor = inRound ? "#90EE90" : "#FF7F7F";
+            } else if (inRound) {
+                const random_prompt = Math.floor(Math.random() * 2);
+                if (random_prompt === 0) {
+                    const random_coach = Math.floor(Math.random() * coach_sounds.length);
+                    coach_sounds[random_coach].play();
+                }
             }
             roundTimer.innerHTML = secondsToTimeString(timeLeft);
         }

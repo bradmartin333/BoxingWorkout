@@ -47,9 +47,9 @@
     </style>
 </head>
 
-<body style="font-family: sans-serif;" onload="loadTime()">
+<body style="font-family: sans-serif;">
     <section class="timer">
-        <div class="round-number">Round 0</div>
+        <div class="round-number">💥🥊</div>
         <div class="time-string"></div>
         <div class="button-flexbox">
             <button class="start-button">Slow</button>
@@ -57,16 +57,19 @@
             <button class="start-button">Fast</button>
         </div>
     </section>
+    <script src="assets/confetti.js"></script>
     <script>
+        var DEBUG = true;
         // User speed
         var maxPromptsPerSecond = 0;
         var secondsElapsed = 0;
         var promptsGiven = 0;
         // Timer
         var roundNum = 0;
-        var pauseTime = 60;
-        var roundTime = 180;
-        var timeLeft = 1; // Also served as start timer
+        var numRounds = 15;
+        var pauseTime = DEBUG ? 5 : 60;
+        var roundTime = DEBUG ? 5 : 180;
+        var startBufferTime = 3; // Let person get set
         var inRound = false;
         // DOM
         var roundStr = document.querySelector(".round-number");
@@ -76,6 +79,7 @@
         var startButtons = document.querySelectorAll(".start-button");
         // Sounds
         var timer_beep = new Audio("assets/sounds/bell.mp3");
+        var cheer = new Audio("assets/sounds/cheer.mp3");
         var coach_sounds = [
             new Audio("assets/sounds/one.mp3"),
             new Audio("assets/sounds/two.mp3"),
@@ -94,47 +98,55 @@
             timeString += seconds;
             return timeString;
         }
-        function loadTime() {
-            roundTimer.innerHTML = secondsToTimeString(timeLeft);
+        function startRound() {
+            inRound = !inRound;
+            if (inRound) {
+                roundNum++;
+                roundStr.innerHTML = "Round " + roundNum;
+            }
+            timerDiv.style.backgroundColor = inRound ? "#90EE90" : "#FF7F7F";
+            timer_beep.play();
         }
-        function decrementTime(seconds) {
+        function generatePrompt() {
+            if (secondsElapsed < startBufferTime ||
+                promptsGiven / secondsElapsed > maxPromptsPerSecond) {
+                return;
+            }
+            if (Math.floor(Math.random() * 2) === 0) {
+                promptsGiven++;
+                coach_sounds[Math.floor(Math.random() * coach_sounds.length)].play();
+            }
+        }
+        function decrementTime() {
             secondsElapsed++;
-            timeLeft -= 1;
+            let timeLeft = (inRound ? roundTime : pauseTime) - secondsElapsed;
             if (timeLeft < 0) {
-                timer_beep.play();
-                inRound = !inRound;
-                if (inRound) {
-                    roundNum++;
-                    roundStr.innerHTML = "Round " + roundNum;
-                    secondsElapsed = 0;
-                    promptsGiven = 0;
-                }
-                timeLeft = inRound ? roundTime : pauseTime;
-                timerDiv.style.backgroundColor = inRound ? "#90EE90" : "#FF7F7F";
-            } else if (inRound) {
-                const random_prompt = Math.floor(Math.random() * 2);
-                if (random_prompt === 0 && promptsGiven / secondsElapsed <= maxPromptsPerSecond) {
-                    promptsGiven++;
-                    const random_coach = Math.floor(Math.random() * coach_sounds.length);
-                    coach_sounds[random_coach].play();
-                    console.log(promptsGiven);
-                }
+                startRound();
+                secondsElapsed = 0;
+                promptsGiven = 0;
+                timeLeft = (inRound ? roundTime : pauseTime) - secondsElapsed;
+            }
+            if (inRound) {
+                generatePrompt();
             }
             roundTimer.innerHTML = secondsToTimeString(timeLeft);
         }
         startButtons.forEach((element, index) => {
             element.addEventListener("click", function () {
                 maxPromptsPerSecond = 0.2 * (index + 1);
-                timer_beep.play();
-                timerDiv.style.backgroundColor = "#FFFFE0 ";
                 buttonBox.style.display = "none";
+                stopConfetti();
+                startRound();
                 decrementTime();
                 var timerId = setInterval(function () {
                     decrementTime();
-                    if (inRound === false && roundNum === 2) {
+                    if (inRound === false && roundNum === numRounds) {
                         clearInterval(timerId);
+                        timerDiv.style.backgroundColor = "#ADD8E6";
                         roundStr.innerHTML = "DONE";
                         roundTimer.style.display = "none";
+                        startConfetti();
+                        cheer.play();
                         return;
                     }
                 }, 1000);

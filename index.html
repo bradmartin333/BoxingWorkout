@@ -31,6 +31,7 @@
             width: 80%;
             flex-wrap: wrap;
             justify-content: center;
+            align-items: center;
             gap: 10px;
         }
 
@@ -63,7 +64,7 @@
         </div>
         <div class="row-flexbox" style="font-weight: bold;">
             <p id="rangeValue">15</p>
-            <p>Rounds</p>
+            <label for="roundNumberSlider">Rounds</label> 
         </div>
         <input type="range" class="slider" min="1" max="15" value="15" step="1" id="roundNumberSlider"
             oninput="rangeValue.innerText = this.value">

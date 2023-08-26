@@ -17,19 +17,19 @@
         }
 
         .round-number {
-            font-size: 15vh;
+            font-size: 50pt;
             margin: 10px;
             text-align: center;
         }
 
         .time-string {
-            font-size: 20vh;
+            font-size: 60pt;
             margin: 10px;
         }
 
         .row-flexbox {
             display: flex;
-            width: 80%;
+            width: 100%;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
@@ -38,13 +38,14 @@
 
         .start-button {
             width: fit-content;
-            height: 5vh;
-            font-size: 3vh;
+            height: fit-content;
+            font-size: 20pt;
             background-color: green;
             color: white;
             border: none;
             cursor: pointer;
             border-radius: 10px;
+            padding: 10px;
         }
 
         .slider {
@@ -108,9 +109,9 @@
         <div class="round-number">💥🥊</div>
         <div class="time-string"></div>
         <div class="row-flexbox">
-            <button class="start-button">Slow</button>
+            <button class="start-button">Easy</button>
             <button class="start-button">Medium</button>
-            <button class="start-button">Fast</button>
+            <button class="start-button">Hard</button>
         </div>
         <div class="row-flexbox" style="font-weight: bold;">
             <p id="rangeValue">15</p>
@@ -174,16 +175,14 @@
     </section>
     <script src="assets/confetti.js"></script>
     <script>
-        var DEBUG = false;
-        // User speed
-        var maxPromptsPerSecond = 0;
-        var secondsElapsed = 0;
-        var promptsGiven = 0;
+        var DEBUG = true;
         // Timer
+        var speed = 0;
         var roundNum = 0;
+        var secondsElapsed = 0;
         var pauseTime = DEBUG ? 5 : 60;
         var roundTime = DEBUG ? 5 : 180;
-        var startBufferTime = 3; // Let person get set
+        var startBufferTime = DEBUG ? 0 : 3; // Let person get set
         var inRound = false;
         // DOM
         var roundStr = document.querySelector(".round-number");
@@ -192,6 +191,7 @@
         var rowBoxes = document.querySelectorAll(".row-flexbox");
         var startButtons = document.querySelectorAll(".start-button");
         var slider = document.querySelector(".slider");
+        var table = document.querySelector(".tg");
         // Sounds
         var timer_beep = new Audio("assets/sounds/bell.mp3");
         var cheer = new Audio("assets/sounds/cheer.mp3");
@@ -229,13 +229,9 @@
             timer_beep.play();
         }
         function generatePrompt() {
-            if (secondsElapsed < startBufferTime ||
-                promptsGiven / secondsElapsed > maxPromptsPerSecond) {
-                return;
-            }
-            if (Math.floor(Math.random() * 2) === 0) {
-                promptsGiven++;
+            if (secondsElapsed > startBufferTime && Math.random() > (0.5 / speed)) {
                 coach_sounds[Math.floor(Math.random() * coach_sounds.length)].play();
+                console.log(roundNum);
             }
         }
         function decrementTime() {
@@ -244,7 +240,6 @@
             if (timeLeft < 0) {
                 startRound();
                 secondsElapsed = 0;
-                promptsGiven = 0;
                 timeLeft = (inRound ? roundTime : pauseTime) - secondsElapsed;
             }
             if (inRound) {
@@ -254,7 +249,7 @@
         }
         startButtons.forEach((element, index) => {
             element.addEventListener("click", function () {
-                maxPromptsPerSecond = 0.2 * (index + 1);
+                speed = index + 1;
                 rowBoxes.forEach((element) => element.style.display = "none");
                 slider.style.display = "none";
                 startRound();
@@ -266,6 +261,7 @@
                         timerDiv.style.backgroundColor = "#ADD8E6";
                         roundStr.innerHTML = "DONE";
                         roundTimer.style.display = "none";
+                        table.style.display = "none";
                         startConfetti();
                         cheer.play();
                         return;

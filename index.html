@@ -15,49 +15,74 @@
             row-gap: 10px;
         }
 
+        .timer .round-number {
+            font-size: 15vh;
+            margin: 10px;
+            text-align: center;
+        }
+
         .timer .time-string {
             font-size: 20vh;
             margin: 10px;
         }
 
+        .timer .button-flexbox {
+            display: flex;
+            width: 80%;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
         .timer .start-button {
-            width: 30vw;
-            height: 7vh;
-            font-size: 5vh;
+            width: fit-content;
+            height: 5vh;
+            font-size: 3vh;
             background-color: green;
             color: white;
             border: none;
             cursor: pointer;
             margin: 10px;
-            border-radius: 20px;
+            border-radius: 10px;
         }
     </style>
 </head>
 
 <body style="font-family: sans-serif;" onload="loadTime()">
     <section class="timer">
-        <div id="round" style="margin: 10px; font-size: 15vh;">Round 0</div>
+        <div class="round-number">Round 0</div>
         <div class="time-string"></div>
-        <button class="start-button">Start</button>
+        <div class="button-flexbox">
+            <button class="start-button">Slow</button>
+            <button class="start-button">Medium</button>
+            <button class="start-button">Fast</button>
+        </div>
     </section>
     <script>
+        // User speed
+        var maxPromptsPerSecond = 0;
+        var secondsElapsed = 0;
+        var promptsGiven = 0;
+        // Timer
         var roundNum = 0;
         var pauseTime = 60;
         var roundTime = 180;
-        var timeLeft = 10;
+        var timeLeft = 1; // Also served as start timer
         var inRound = false;
-        var roundStr = document.querySelector("#round");
+        // DOM
+        var roundStr = document.querySelector(".round-number");
         var timerDiv = document.querySelector(".timer");
         var roundTimer = document.querySelector(".time-string");
-        var startButton = document.querySelector(".start-button");
-        var timer_beep = new Audio("assets/sounds/timer.wav");
+        var buttonBox = document.querySelector(".button-flexbox");
+        var startButtons = document.querySelectorAll(".start-button");
+        // Sounds
+        var timer_beep = new Audio("assets/sounds/bell.mp3");
         var coach_sounds = [
-            new Audio("assets/sounds/coach/one.mp3"),
-            new Audio("assets/sounds/coach/two.mp3"),
-            new Audio("assets/sounds/coach/left.mp3"),
-            new Audio("assets/sounds/coach/right.mp3"),
-            new Audio("assets/sounds/coach/pivot in.mp3"),
-            new Audio("assets/sounds/coach/pivot out.mp3"),
+            new Audio("assets/sounds/one.mp3"),
+            new Audio("assets/sounds/two.mp3"),
+            new Audio("assets/sounds/left.mp3"),
+            new Audio("assets/sounds/right.mp3"),
+            new Audio("assets/sounds/pivot in.mp3"),
+            new Audio("assets/sounds/pivot out.mp3"),
         ];
         function secondsToTimeString(seconds) {
             var minutes = Math.floor(seconds / 60);
@@ -73,6 +98,7 @@
             roundTimer.innerHTML = secondsToTimeString(timeLeft);
         }
         function decrementTime(seconds) {
+            secondsElapsed++;
             timeLeft -= 1;
             if (timeLeft < 0) {
                 timer_beep.play();
@@ -80,32 +106,39 @@
                 if (inRound) {
                     roundNum++;
                     roundStr.innerHTML = "Round " + roundNum;
+                    secondsElapsed = 0;
+                    promptsGiven = 0;
                 }
                 timeLeft = inRound ? roundTime : pauseTime;
                 timerDiv.style.backgroundColor = inRound ? "#90EE90" : "#FF7F7F";
             } else if (inRound) {
                 const random_prompt = Math.floor(Math.random() * 2);
-                if (random_prompt === 0) {
+                if (random_prompt === 0 && promptsGiven / secondsElapsed <= maxPromptsPerSecond) {
+                    promptsGiven++;
                     const random_coach = Math.floor(Math.random() * coach_sounds.length);
                     coach_sounds[random_coach].play();
+                    console.log(promptsGiven);
                 }
             }
             roundTimer.innerHTML = secondsToTimeString(timeLeft);
         }
-        startButton.addEventListener("click", function () {
-            timer_beep.play();
-            timerDiv.style.backgroundColor = "#FF7F7F";
-            startButton.style.display = "none";
-            decrementTime();
-            var timerId = setInterval(function () {
+        startButtons.forEach((element, index) => {
+            element.addEventListener("click", function () {
+                maxPromptsPerSecond = 0.2 * (index + 1);
+                timer_beep.play();
+                timerDiv.style.backgroundColor = "#FFFFE0 ";
+                buttonBox.style.display = "none";
                 decrementTime();
-                if (inRound === false && roundNum === 2) {
-                    clearInterval(timerId);
-                    roundStr.innerHTML = "DONE";
-                    roundTimer.style.display = "none";
-                    return;
-                }
-            }, 1000);
+                var timerId = setInterval(function () {
+                    decrementTime();
+                    if (inRound === false && roundNum === 2) {
+                        clearInterval(timerId);
+                        roundStr.innerHTML = "DONE";
+                        roundTimer.style.display = "none";
+                        return;
+                    }
+                }, 1000);
+            }, { once: true });
         });
     </script>
 </body>

@@ -15,25 +15,26 @@
             row-gap: 10px;
         }
 
-        .timer .round-number {
+        .round-number {
             font-size: 15vh;
             margin: 10px;
             text-align: center;
         }
 
-        .timer .time-string {
+        .time-string {
             font-size: 20vh;
             margin: 10px;
         }
 
-        .timer .button-flexbox {
+        .row-flexbox {
             display: flex;
             width: 80%;
             flex-wrap: wrap;
             justify-content: center;
+            gap: 10px;
         }
 
-        .timer .start-button {
+        .start-button {
             width: fit-content;
             height: 5vh;
             font-size: 3vh;
@@ -41,8 +42,12 @@
             color: white;
             border: none;
             cursor: pointer;
-            margin: 10px;
             border-radius: 10px;
+        }
+
+        .slider {
+            width: 80%;
+            height: 3vh;
         }
     </style>
 </head>
@@ -51,22 +56,44 @@
     <section class="timer">
         <div class="round-number">💥🥊</div>
         <div class="time-string"></div>
-        <div class="button-flexbox">
+        <div class="row-flexbox">
             <button class="start-button">Slow</button>
             <button class="start-button">Medium</button>
             <button class="start-button">Fast</button>
         </div>
+        <div class="row-flexbox" style="font-weight: bold;">
+            <p id="rangeValue">15</p>
+            <p>Rounds</p>
+        </div>
+        <input type="range" class="slider" min="1" max="15" value="15" step="1" id="roundNumberSlider"
+            oninput="rangeValue.innerText = this.value">
     </section>
+    <div style="position: absolute; bottom: 0px;">
+        <b>Punches</b><br>
+        <b>1: </b>Jab<br>
+        <b>2: </b>Cross<br>
+        <b>3: </b>Lead Hook<br>
+        <b>4: </b>Rear Hook<br>
+        <b>5: </b>Lead Uppercut<br>
+        <b>6: </b>Rear Uppercut<br>
+        <br>
+        <b>Steps</b><br>
+        <b>F: </b>Front Foot Step + 12<br>
+        <b>B: </b>Back Foot Step + 1,2<br>
+        <b>L: </b>Parry + Left Step + 121<br>
+        <b>R: </b>Pary + Right Step + 2,2<br>
+        <b>In: </b>Turn Facing + 332<br>
+        <b>Out: </b>Turn Away + 232
+    </div>
     <script src="assets/confetti.js"></script>
     <script>
-        var DEBUG = true;
+        var DEBUG = false;
         // User speed
         var maxPromptsPerSecond = 0;
         var secondsElapsed = 0;
         var promptsGiven = 0;
         // Timer
         var roundNum = 0;
-        var numRounds = 15;
         var pauseTime = DEBUG ? 5 : 60;
         var roundTime = DEBUG ? 5 : 180;
         var startBufferTime = 3; // Let person get set
@@ -75,14 +102,21 @@
         var roundStr = document.querySelector(".round-number");
         var timerDiv = document.querySelector(".timer");
         var roundTimer = document.querySelector(".time-string");
-        var buttonBox = document.querySelector(".button-flexbox");
+        var rowBoxes = document.querySelectorAll(".row-flexbox");
         var startButtons = document.querySelectorAll(".start-button");
+        var slider = document.querySelector(".slider");
         // Sounds
         var timer_beep = new Audio("assets/sounds/bell.mp3");
         var cheer = new Audio("assets/sounds/cheer.mp3");
         var coach_sounds = [
             new Audio("assets/sounds/one.mp3"),
             new Audio("assets/sounds/two.mp3"),
+            new Audio("assets/sounds/three.mp3"),
+            new Audio("assets/sounds/four.mp3"),
+            new Audio("assets/sounds/five.mp3"),
+            new Audio("assets/sounds/six.mp3"),
+            new Audio("assets/sounds/forward.mp3"),
+            new Audio("assets/sounds/backward.mp3"),
             new Audio("assets/sounds/left.mp3"),
             new Audio("assets/sounds/right.mp3"),
             new Audio("assets/sounds/pivot in.mp3"),
@@ -134,13 +168,13 @@
         startButtons.forEach((element, index) => {
             element.addEventListener("click", function () {
                 maxPromptsPerSecond = 0.2 * (index + 1);
-                buttonBox.style.display = "none";
-                stopConfetti();
+                rowBoxes.forEach((element) => element.style.display = "none");
+                slider.style.display = "none";
                 startRound();
                 decrementTime();
                 var timerId = setInterval(function () {
                     decrementTime();
-                    if (inRound === false && roundNum === numRounds) {
+                    if (inRound === false && roundNum == slider.value) {
                         clearInterval(timerId);
                         timerDiv.style.backgroundColor = "#ADD8E6";
                         roundStr.innerHTML = "DONE";

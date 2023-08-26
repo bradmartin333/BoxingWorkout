@@ -8,7 +8,6 @@
     <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
     <style>
         .timer {
-            border: 1px solid black;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -48,12 +47,8 @@
             padding: 10px;
         }
 
-        .slider {
-            width: 80%;
-            height: 3vh;
-        }
-
         .tg {
+            margin-top: 30px;
             border-collapse: collapse;
             border-spacing: 0;
         }
@@ -109,15 +104,15 @@
         <div class="round-number">💥🥊</div>
         <div class="time-string"></div>
         <div class="row-flexbox">
-            <button class="start-button">Easy</button>
-            <button class="start-button">Medium</button>
-            <button class="start-button">Hard</button>
+            <button class="start-button">35%</button>
+            <button class="start-button">50%</button>
+            <button class="start-button">85%</button>
         </div>
-        <div class="row-flexbox" style="font-weight: bold;">
+        <div class="row-flexbox" style="font-weight: bold; margin-top: 30px;">
             <p id="rangeValue">15</p>
             <label for="roundNumberSlider">Rounds</label>
         </div>
-        <input type="range" class="slider" min="1" max="15" value="15" step="1" id="roundNumberSlider"
+        <input type="range" style="width: 80%;" min="1" max="15" value="15" step="1" id="roundNumberSlider"
             oninput="rangeValue.innerText = this.value">
         <table class="tg">
             <thead>
@@ -175,7 +170,7 @@
     </section>
     <script src="assets/confetti.js"></script>
     <script>
-        var DEBUG = true;
+        var DEBUG = false;
         // Timer
         var speed = 0;
         var roundNum = 0;
@@ -190,7 +185,7 @@
         var roundTimer = document.querySelector(".time-string");
         var rowBoxes = document.querySelectorAll(".row-flexbox");
         var startButtons = document.querySelectorAll(".start-button");
-        var slider = document.querySelector(".slider");
+        var slider = document.querySelector("#roundNumberSlider");
         var table = document.querySelector(".tg");
         // Sounds
         var timer_beep = new Audio("assets/sounds/bell.mp3");
@@ -229,9 +224,8 @@
             timer_beep.play();
         }
         function generatePrompt() {
-            if (secondsElapsed > startBufferTime && Math.random() > (0.5 / speed)) {
+            if (secondsElapsed > startBufferTime && Math.random() < speed) {
                 coach_sounds[Math.floor(Math.random() * coach_sounds.length)].play();
-                console.log(roundNum);
             }
         }
         function decrementTime() {
@@ -249,7 +243,7 @@
         }
         startButtons.forEach((element, index) => {
             element.addEventListener("click", function () {
-                speed = index + 1;
+                speed = parseInt(element.innerHTML.replace("%","")) / 100;
                 rowBoxes.forEach((element) => element.style.display = "none");
                 slider.style.display = "none";
                 startRound();
